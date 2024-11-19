@@ -36,10 +36,11 @@ app.use((req, res, next) => {
 });
 
 app.all(
-  "/graphql",
+  "/",
   createHandler({
     schema: schema,
     rootValue: graphQLResolver,
+    graphiql: true, // Enables the GraphiQL interface
   })
 );
 

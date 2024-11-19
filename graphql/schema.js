@@ -26,7 +26,11 @@ const schema = buildSchema(`#graphql
         name: String!
         password:String!
     }
+    type RootQuery {
+        placeholder: String # Add a placeholder query field
+    }
     schema {
+        query:RootQuery
         mutation: RootMutation
     }
 `);
