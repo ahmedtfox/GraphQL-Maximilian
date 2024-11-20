@@ -41,6 +41,21 @@ app.all(
     schema: schema,
     rootValue: graphQLResolver,
     graphiql: true, // Enables the GraphiQL interface
+    formatError(err) {
+      if (!err.originalError) {
+        return err;
+      }
+      const error = err.originalError;
+      const message = error.message || "An error occurred.";
+      const code = error.code || 500;
+      const data = error.data || [];
+      console.log(error);
+      return {
+        message,
+        status: code,
+        data,
+      };
+    },
   })
 );
 
