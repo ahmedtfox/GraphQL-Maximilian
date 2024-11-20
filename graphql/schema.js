@@ -21,13 +21,17 @@ const schema = buildSchema(`#graphql
         status:String!
         posts:[Post!]!
     }
+    type AuthData{
+        token:String!
+        userId:String!
+    }
     input UserInputData {
         email: String!
         name: String!
         password:String!
     }
     type RootQuery {
-        placeholder: String # Add a placeholder query field
+       login(email:String!,password:String!):AuthData!
     }
     schema {
         query:RootQuery

@@ -1,5 +1,7 @@
 const User = require("../model/user");
 const { isEmail, isEmpty, isLength } = require("validator");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
 const createUser = async (args, req) => {
   const userInput = args.userInput;
@@ -33,4 +35,34 @@ const createUser = async (args, req) => {
   const result = await newUser.save();
   return { ...result._doc, _id: result._id.toString() };
 };
-module.exports = { createUser };
+
+const login = async (args, req) => {
+  const email = args.email;
+  const password = args.password;
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    const error = new Error("User not found.");
+    error.code = 401;
+    throw error;
+  }
+  const checkPassword = await user.comparePassword(password);
+  if (!checkPassword) {
+    const err = new Error("password not correct");
+    err.code = 401;
+    throw err;
+  }
+  const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
+  const EXPIRE_TOKEN = process.env.EXPIRE_TOKEN;
+  const token = jwt.sign(
+    {
+      userId: user._id.toString(),
+      email: user.email,
+    },
+    JWT_SECRET_KEY,
+    { expiresIn: EXPIRE_TOKEN }
+  );
+  return { token, userId: user._id.toString() };
+};
+
+module.exports = { createUser, login };
