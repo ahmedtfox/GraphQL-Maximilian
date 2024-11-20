@@ -96,7 +96,7 @@ const createPost = async (args, context) => {
   });
   const result = await newPost.save();
   user.posts.push(result);
-  console.log(result);
+  await user.save();
   return {
     ...result._doc,
     _id: result._id.toString(),
