@@ -28,10 +28,13 @@ app.use("/feed/images", isAuth, express.static(path.join(__dirname, "images")));
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
-    "Access-Control-Allow-mETHODS",
+    "Access-Control-Allow-METHODS",
     "OPTIONS,GET,POST,PUT,PATCH,DELETE"
   );
   res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
+  if (req.method === "OPTIONS") {
+    return res.statusCode(200).end();
+  }
   next();
 });
 
