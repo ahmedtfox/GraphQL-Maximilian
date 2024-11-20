@@ -1,4 +1,5 @@
 const User = require("../model/user");
+const Post = require("../model/post");
 const { isEmail, isEmpty, isLength } = require("validator");
 
 const createUser = async (args, req) => {
@@ -56,4 +57,40 @@ const login = async (args, req) => {
   return { token, userId: user._id.toString() };
 };
 
-module.exports = { createUser, login };
+const createPost = async (args, req) => {
+  const postInput = args.postInput;
+  const title = postInput.title || "";
+  const content = postInput.content || "";
+  const imageUrl = postInput.imageUrl || "";
+  const creator = "673cd080026e395def6f2494";
+  let validatorErrors = [];
+  console.log(args);
+  if (!isLength(content, { min: 5 }) || isEmpty(content)) {
+    validatorErrors.push("Content is invalid!");
+  }
+  if (!isLength(title, { min: 5 }) || isEmpty(title)) {
+    validatorErrors.push("Title is invalid!");
+  }
+  if (validatorErrors.length > 0) {
+    const error = new Error("Invalid Input.");
+    error.data = validatorErrors;
+    error.code = 422;
+    throw error;
+  }
+  const newPost = new Post({
+    title: title,
+    content: content,
+    imageUrl: imageUrl,
+    creator: creator,
+  });
+  const result = await newPost.save();
+  console.log(result);
+  return {
+    ...result._doc,
+    _id: result._id.toString(),
+    createdAt: result.createdAt.toISOString(),
+    updatedAt: result.updatedAt.toISOString(),
+  };
+};
+
+module.exports = { createUser, login, createPost };

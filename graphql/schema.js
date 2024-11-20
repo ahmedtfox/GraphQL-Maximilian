@@ -3,6 +3,12 @@ const { buildSchema } = require("graphql");
 const schema = buildSchema(`#graphql
     type RootMutation {
         createUser(userInput:UserInputData):User!
+        createPost(postInput:PostInputData):Post!
+    }
+    input PostInputData{
+        title:String!
+        content:String!
+        imageUrl:String!
     }
     type Post{
         _id:ID!
