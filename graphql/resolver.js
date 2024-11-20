@@ -57,14 +57,19 @@ const login = async (args, req) => {
   return { token, userId: user._id.toString() };
 };
 
-const createPost = async (args, req) => {
+const createPost = async (args, context) => {
+  const isAuth = context.req.raw.isAuth || false;
+  const userId = context.req.raw.userId || "";
+  if (isAuth === false) {
+    const error = new Error("Not Authenticated!");
+    error.code = 401;
+    throw error;
+  }
   const postInput = args.postInput;
   const title = postInput.title || "";
   const content = postInput.content || "";
   const imageUrl = postInput.imageUrl || "";
-  const creator = "673cd080026e395def6f2494";
   let validatorErrors = [];
-  console.log(args);
   if (!isLength(content, { min: 5 }) || isEmpty(content)) {
     validatorErrors.push("Content is invalid!");
   }
@@ -77,13 +82,20 @@ const createPost = async (args, req) => {
     error.code = 422;
     throw error;
   }
+  const user = await User.findById(userId);
+  if (!user) {
+    const error = new Error("Invalid user.");
+    error.code = 401;
+    throw error;
+  }
   const newPost = new Post({
     title: title,
     content: content,
     imageUrl: imageUrl,
-    creator: creator,
+    creator: user,
   });
   const result = await newPost.save();
+  user.posts.push(result);
   console.log(result);
   return {
     ...result._doc,

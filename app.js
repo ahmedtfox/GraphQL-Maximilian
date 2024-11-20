@@ -22,8 +22,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.use(cors());
-
-app.use("/feed/images", isAuth, express.static(path.join(__dirname, "images")));
+app.use(isAuth);
+app.use("/feed/images", express.static(path.join(__dirname, "images")));
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -44,6 +44,10 @@ app.all(
     schema: schema,
     rootValue: graphQLResolver,
     graphiql: true, // Enables the GraphiQL interface
+    context: (req) => {
+      // Pass request and response objects to the resolvers
+      return { req };
+    },
     formatError(err) {
       if (!err.originalError) {
         return err;
