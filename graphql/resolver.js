@@ -105,4 +105,30 @@ const createPost = async (args, context) => {
   };
 };
 
-module.exports = { createUser, login, createPost };
+const posts = async (args, context) => {
+  const isAuth = context.req.raw.isAuth || false;
+  const userId = context.req.raw.userId || "";
+  if (isAuth === false) {
+    const error = new Error("Not Authenticated!");
+    error.code = 401;
+    throw error;
+  }
+  const totalPosts = await Post.find().countDocuments();
+  const rowPosts = await Post.find()
+    .sort({ createdAt: -1 })
+    .populate("creator");
+  const posts = rowPosts.map((post) => {
+    return {
+      ...post._doc,
+      _id: post._id.toString(),
+      createdAt: post.createdAt.toISOString(),
+      updatedAt: post.updatedAt.toISOString(),
+    };
+  });
+  return {
+    posts: posts,
+    totalPosts: totalPosts,
+  };
+};
+
+module.exports = { createUser, login, createPost, posts };

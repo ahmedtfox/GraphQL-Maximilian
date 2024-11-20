@@ -36,8 +36,13 @@ const schema = buildSchema(`#graphql
         name: String!
         password:String!
     }
+    type PostData{
+        posts:[Post]!
+        totalPosts:Int!
+    }
     type RootQuery {
        login(email:String!,password:String!):AuthData!
+       posts:PostData!
     }
     schema {
         query:RootQuery
