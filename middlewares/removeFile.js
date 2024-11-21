@@ -1,9 +1,11 @@
 const fs = require("fs");
 const path = require("path");
 
-function removeFile(filename, filePath) {
+function removeFile(input) {
+  let filePath = input.filePath || undefined;
+  const filename = input.filename || undefined;
   if (!filePath) {
-    const filePath = path.join("images", filename);
+    filePath = path.join("images", filename);
   }
   fs.unlink(filePath, (err) => {
     if (err) {

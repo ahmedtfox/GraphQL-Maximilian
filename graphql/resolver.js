@@ -240,7 +240,7 @@ const deletePost = async (args, context) => {
     throw error;
   }
   console.log(post.imageUrl);
-  removeFile(undefined, post.imageUrl);
+  removeFile({ filePath: post.imageUrl });
   post = await Post.findByIdAndDelete(postId);
   const user = await User.findById(userId);
   user.posts.pull(postId);
