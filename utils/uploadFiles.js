@@ -1,5 +1,7 @@
 const moment = require("moment");
 const multer = require("multer");
+const express = require("express");
+const router = express.Router();
 
 const fileFilter = (req, file, cb) => {
   const fileType = file.mimetype;
@@ -31,4 +33,16 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage, fileFilter });
 
-module.exports = upload;
+router.post("/", upload.single("image"), (req, res) => {
+  if (!req.file) {
+    return res.status(200).json({ message: "No file provided!" });
+  }
+  if (req.body.oldPath) {
+    removeFile(req.body.oldPath);
+  }
+  return res
+    .status(201)
+    .json({ message: "File stored", filePath: req.file.path });
+});
+
+module.exports = router;

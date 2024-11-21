@@ -23,8 +23,12 @@ app.use(bodyParser.json());
 
 app.use(cors());
 app.use(isAuth);
+
 app.use("/feed/images", express.static(path.join(__dirname, "images")));
 
+const upload = require("./utils/uploadFiles");
+app.use("/post-image", upload);
+ 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
