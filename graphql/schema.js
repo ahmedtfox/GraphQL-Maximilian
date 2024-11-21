@@ -1,14 +1,15 @@
 const { buildSchema } = require("graphql");
 
 const schema = buildSchema(`#graphql
-    type RootMutation {
-        createUser(userInput:UserInputData):User!
-        createPost(postInput:PostInputData):Post!
-    }
     input PostInputData{
         title:String!
         content:String!
         imageUrl:String!
+    }
+    input PostInputUpdate{
+        title:String
+        content:String
+        imageUrl:String
     }
     type Post{
         _id:ID!
@@ -44,6 +45,11 @@ const schema = buildSchema(`#graphql
        login(email:String!,password:String!):AuthData!
        posts(page:Int):PostData!
        post(id:ID!):Post!
+    }
+    type RootMutation {
+        createUser(userInput:UserInputData):User!
+        createPost(postInput:PostInputData):Post!
+        updatePost(id:ID!,postInput:PostInputUpdate):Post!
     }
     schema {
         query:RootQuery

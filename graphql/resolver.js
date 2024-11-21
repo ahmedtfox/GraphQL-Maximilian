@@ -160,4 +160,62 @@ const post = async (args, context) => {
   };
 };
 
-module.exports = { createUser, login, createPost, posts, post };
+const updatePost = async (args, context) => {
+  const isAuth = context.req.raw.isAuth || false;
+  const userId = context.req.raw.userId || "";
+  if (isAuth === false) {
+    const error = new Error("Not Authenticated!");
+    error.code = 401;
+    throw error;
+  }
+  const postId = args.id;
+  const postInput = args.postInput;
+  const title = postInput.title || undefined;
+  const content = postInput.content || undefined;
+  const imageUrl = postInput.imageUrl || undefined;
+  let validatorErrors = [];
+  if (content) {
+    if (!isLength(content, { min: 5 }) || isEmpty(content)) {
+      validatorErrors.push("Content is invalid!");
+    }
+  }
+  if (title) {
+    if (!isLength(title, { min: 5 }) || isEmpty(title)) {
+      validatorErrors.push("Title is invalid!");
+    }
+  }
+  if (validatorErrors.length > 0) {
+    const error = new Error("Invalid Input.");
+    error.data = validatorErrors;
+    error.code = 422;
+    throw error;
+  }
+  let post = await Post.findById(postId).populate("creator");
+  if (!post) {
+    const error = new Error("Post not found!");
+    error.code = 404;
+    throw error;
+  }
+  if (post.creator._id.toString() !== userId.toString()) {
+    const error = new Error("Not authorized!");
+    error.code = 404;
+    throw error;
+  }
+  post = await Post.findByIdAndUpdate(
+    postId,
+    {
+      title,
+      content,
+      imageUrl,
+    },
+    { new: true }
+  );
+  return {
+    ...post._doc,
+    _id: post._id.toString(),
+    createdAt: post.createdAt.toISOString(),
+    updatedAt: post.updatedAt.toISOString(),
+  };
+};
+
+module.exports = { createUser, login, createPost, posts, post, updatePost };
