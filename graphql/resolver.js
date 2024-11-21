@@ -113,9 +113,15 @@ const posts = async (args, context) => {
     error.code = 401;
     throw error;
   }
+  // pagination
+  const page = args.page || 1;
+  const perPage = 2;
+  const skip = (page - 1) * perPage;
   const totalPosts = await Post.find().countDocuments();
   const rowPosts = await Post.find()
     .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(perPage)
     .populate("creator");
   const posts = rowPosts.map((post) => {
     return {
