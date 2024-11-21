@@ -248,6 +248,49 @@ const deletePost = async (args, context) => {
   return true;
 };
 
+const user = async (args, context) => {
+  const isAuth = context.req.raw.isAuth || false;
+  const userId = context.req.raw.userId || "";
+  if (isAuth === false) {
+    const error = new Error("Not Authenticated!");
+    error.code = 401;
+    throw error;
+  }
+  const user = await User.findById(userId).populate("posts");
+  if (!user) {
+    const error = new Error("User not found!");
+    error.code = 404;
+    throw error;
+  }
+  return {
+    ...user._doc,
+    _id: user._id.toString(),
+  };
+};
+
+const updateStatus = async (args, context) => {
+  const isAuth = context.req.raw.isAuth || false;
+  const userId = context.req.raw.userId || "";
+  if (isAuth === false) {
+    const error = new Error("Not Authenticated!");
+    error.code = 401;
+    throw error;
+  }
+  let user = await User.findById(userId).populate("posts");
+  if (!user) {
+    const error = new Error("User not found!");
+    error.code = 404;
+    throw error;
+  }
+  const newStatus = args.status;
+  user.status = newStatus;
+  const updatedUser = await user.save();
+  return {
+    ...updatedUser._doc,
+    _id: updatedUser._id.toString(),
+  };
+};
+
 module.exports = {
   createUser,
   login,
@@ -256,4 +299,6 @@ module.exports = {
   post,
   updatePost,
   deletePost,
+  user,
+  updateStatus,
 };
