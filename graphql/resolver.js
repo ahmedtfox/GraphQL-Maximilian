@@ -1,7 +1,7 @@
 const User = require("../model/user");
 const Post = require("../model/post");
 const { isEmail, isEmpty, isLength } = require("validator");
-
+const removeFile = require("../middlewares/removeFile");
 const createUser = async (args, req) => {
   const userInput = args.userInput;
   const email = userInput.email;
@@ -218,4 +218,42 @@ const updatePost = async (args, context) => {
   };
 };
 
-module.exports = { createUser, login, createPost, posts, post, updatePost };
+const deletePost = async (args, context) => {
+  const isAuth = context.req.raw.isAuth || false;
+  const userId = context.req.raw.userId || "";
+  if (isAuth === false) {
+    const error = new Error("Not Authenticated!");
+    error.code = 401;
+    throw error;
+  }
+  const postId = args.id;
+
+  let post = await Post.findById(postId).populate("creator");
+  if (!post) {
+    const error = new Error("Post not found!");
+    error.code = 404;
+    throw error;
+  }
+  if (post.creator._id.toString() !== userId.toString()) {
+    const error = new Error("Not authorized!");
+    error.code = 404;
+    throw error;
+  }
+  console.log(post.imageUrl);
+  removeFile(undefined, post.imageUrl);
+  post = await Post.findByIdAndDelete(postId);
+  const user = await User.findById(userId);
+  user.posts.pull(postId);
+  await user.save();
+  return true;
+};
+
+module.exports = {
+  createUser,
+  login,
+  createPost,
+  posts,
+  post,
+  updatePost,
+  deletePost,
+};

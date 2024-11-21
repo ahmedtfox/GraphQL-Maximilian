@@ -50,6 +50,7 @@ const schema = buildSchema(`#graphql
         createUser(userInput:UserInputData):User!
         createPost(postInput:PostInputData):Post!
         updatePost(id:ID!,postInput:PostInputUpdate):Post!
+        deletePost(id:String!):Boolean!
     }
     schema {
         query:RootQuery
